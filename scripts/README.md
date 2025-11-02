@@ -1,3 +1,4 @@
+```bash
 uv run python scripts/classy.py \
   --dataset yelp_review_full \
   --splits train test \
@@ -5,3 +6,4 @@ uv run python scripts/classy.py \
   --batch_size 32 \
   --max_length 256 \
   --push_repo LightFury9/yelp-5star-probs
+  ```

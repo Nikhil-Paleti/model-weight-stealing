@@ -11,3 +11,7 @@ wheels/
 
 # secrets
 .env
+
+# models
+*.joblib
+*.pkl
