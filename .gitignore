@@ -15,3 +15,5 @@ wheels/
 # models
 *.joblib
 *.pkl
+*.pdf
+*.npz
