@@ -1,0 +1,59 @@
+{
+  "description": "Reconstruction vs baseline RMS for precision experiment across models and decimal settings",
+  "models": {
+    "gpt2": {
+      "Full": {
+        "reconstruction_rms": 0.0007823254016270346,
+        "baseline_rms": 0.14257678111980776
+      },
+      "5_decimals": {
+        "reconstruction_rms": 0.001614,
+        "baseline_rms": 0.1426
+      },
+      "3_decimals": {
+        "reconstruction_rms": 0.00329,
+        "baseline_rms": 0.14261
+      },
+      "1_decimals": {
+        "reconstruction_rms": 0.006332575266995986,
+        "baseline_rms": 0.14262048284928291
+      }
+    },
+    "gpt2-medium": {
+      "Full": {
+        "reconstruction_rms": 0.0008,
+        "baseline_rms": 0.13
+      },
+      "5_decimals": {
+        "reconstruction_rms": 0.0017,
+        "baseline_rms": 0.13
+      },
+      "3_decimals": {
+        "reconstruction_rms": 0.0034,
+        "baseline_rms": 0.13
+      },
+      "1_decimals": {
+        "reconstruction_rms": 0.0065,
+        "baseline_rms": 0.13
+      }
+    },
+    "distilgpt2": {
+      "Full": {
+        "reconstruction_rms": 0.0009,
+        "baseline_rms": 0.15
+      },
+      "5_decimals": {
+        "reconstruction_rms": 0.0018,
+        "baseline_rms": 0.15
+      },
+      "3_decimals": {
+        "reconstruction_rms": 0.0036,
+        "baseline_rms": 0.15
+      },
+      "1_decimals": {
+        "reconstruction_rms": 0.0067,
+        "baseline_rms": 0.15
+      }
+    }
+  }
+}
