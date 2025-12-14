@@ -1,68 +1,77 @@
 # Model Weight Stealing
 
-This repository explores **model/task stealing** using various methods.  
-This project is conducted as part of the **DSC261 course**.
+This repository contains reproducible experiments on **model extraction / model stealing** for NLP systems, developed for **DSC 261**.
 
-Repository: https://github.com/LightFury9/model-weight-stealing
+The project includes:
 
+- Knockoff-style functionality stealing (classification)
+- DisGUIDE-style disagreement-guided active querying (classification)
+- Logit-based reconstruction (causal LMs), inspired by Finlayson et al. and Carlini et al.
 
-## Setup
+## Environment
+
+**Python:** 3.12+ (see `pyproject.toml`).
+
+### Install (recommended: `uv`)
 
 ```bash
-git clone https://github.com/LightFury9/model-weight-stealing
-cd model-weight-stealing
 uv sync
 ```
 
-(Optional) Add a `.env` file if pushing to Hugging Face:
+### Install (pip fallback)
 
+```bash
+python -m pip install -U pip
+python -m pip install -U torch transformers datasets scikit-learn joblib accelerate huggingface-hub
 ```
-HUGGINGFACE_HUB_TOKEN=hf_xxxxx
-```
 
+## Reproducing Results (Quick Map)
 
-## Initial Experiment — Teacher & Knockoff (Student) Model
+### 1) Knockoff / classification stealing (final project)
 
-We use the **`yelp_review_full`** dataset and run inference using the teacher model:
+Final-project knockoff experiments are implemented in the notebook:
 
-- **Teacher Model:** `nlptown/bert-base-multilingual-uncased-sentiment`  
-- **Outputs extracted per sample:**
-  - `model_probs` → softmax probabilities (size 5)  
-  - `model_pred` → predicted label (1–5 stars)  
-- These predictions are saved and pushed to the HF Hub as:  
-  **`LightFury9/yelp-5star-probs`**
+- `knockoff/Teacher_model_accuracy.ipynb`
 
-Next, we train two student (knockoff) models using these outputs. Both experiments are in the `knockoff/` folder.
+It trains a DistilBERT teacher on Yelp, simulates a **50k-query** extraction dataset, and evaluates students of increasing capacity (TF-IDF linear, TF-IDF MLP, DistilBERT student).
 
-### Experiment 1: Stealing Using Soft Labels (Probabilities)
+Expected headline metrics (from our runs):
 
-Student is trained on **full probability vectors (`model_probs`)** using TF-IDF + Ridge Regression.
+- Teacher test accuracy: **0.654**
+- Best student fidelity (Acc vs Teacher): **0.8063** (DistilBERT KD)
 
-**Results:**
-- Accuracy vs Teacher: **0.6465**
-- Accuracy vs True Labels: **0.5585**
+See `knockoff/README.md` for exact steps and the full table.
 
-### Experiment 2: Stealing Using Hard Labels Only
+### 2) DisGUIDE / active querying (live teacher)
 
-Student is trained **only on the teacher’s predicted labels (`model_pred`)**, no probability info.
+Implementation:
 
-**Results:**
-- Accuracy vs True Labels: **0.5862**
-- Accuracy vs Teacher: **0.5854**
+- `disguide/disguide.py`
 
-### Initial Analysis
+Expected headline metric (1,000-query budget):
 
-| Scenario        | API Output        | Accuracy       | Difficulty |
-|-----------------|--------------------|----------------|------------|
-| Soft-label KD   | Probabilities      | 0.6465 vs teacher | Easier to steal |
-| Hard-label only | Class label only   | 0.5862 vs true    | Harder, but still possible |
+- Student accuracy vs teacher: **0.825**
 
-Providing **probabilities/logits makes model extraction significantly easier**  
-Even with **only class labels**, a student can still approximate the teacher model
+See `disguide/README.md`.
 
----
+### 3) Logit-based reconstruction (causal LMs)
 
+Implementation:
 
-## License
+- `logit_reconstruction/run_experiments.py`
 
-This project is intended for **research and educational purposes only**.
+Outputs:
+
+- `logit_reconstruction/experiments/all_results.json` (Finlayson-style)
+- `logit_reconstruction/experiments/carlini_results.json` (Carlini-style)
+- `logit_reconstruction/experiments/*_metrics.txt` (per-run summaries)
+
+See `logit_reconstruction/README.md`.
+
+## Legacy baseline (midterm)
+
+The earlier baseline used a pretrained teacher (`nlptown/bert-base-multilingual-uncased-sentiment`) and a pushed dataset (`LightFury9/yelp-5star-probs`) with deterministic sklearn scripts in `knockoff/`. These scripts are still available, but the final project report uses `knockoff/Teacher_model_accuracy.ipynb`.
+
+## Notes
+
+- Some experiments benefit significantly from a GPU (teacher/LM inference).

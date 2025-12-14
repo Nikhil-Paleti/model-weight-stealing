@@ -21,7 +21,7 @@ We work with local copies of several open models and simulate different attacker
 **How to run.**
 
 ```bash
-python logit_reconstruction/run_experiments.py --experiment 1
+uv run python logit_reconstruction/run_experiments.py --experiment 1
 ```
 
 **Key outputs (in `logit_reconstruction/experiments/`):**
@@ -47,7 +47,7 @@ For all four models, RMS reconstruction error decreases sharply as N grows and e
 **How to run.**
 
 ```bash
-python logit_reconstruction/run_experiments.py --experiment 2
+uv run python logit_reconstruction/run_experiments.py --experiment 2
 ```
 
 **Key outputs:**
@@ -78,7 +78,7 @@ Rounding logits to 5 or 3 decimal places has little effect on reconstruction qua
 **How to run.**
 
 ```bash
-python logit_reconstruction/run_experiments.py --experiment 3
+uv run python logit_reconstruction/run_experiments.py --experiment 3
 ```
 
 **Key outputs:**
@@ -96,13 +96,19 @@ You can run any combination of experiments from the repository root:
 
 ```bash
 # Experiments 1 and 2 (Finlayson-style)
-python logit_reconstruction/run_experiments.py
+uv run python logit_reconstruction/run_experiments.py
 
 # Only precision experiment
-python logit_reconstruction/run_experiments.py --experiment 2
+uv run python logit_reconstruction/run_experiments.py --experiment 2
 
 # Carlini-style internal-layer stealing
-python logit_reconstruction/run_experiments.py --experiment 3
+uv run python logit_reconstruction/run_experiments.py --experiment 3
 ```
 
-All artifacts are written to `logit_reconstruction/experiments/` and can be used directly for figures or tables in the report.
+## Tabular Results (for reports)
+
+All numeric results needed for tables are written to:
+
+- `logit_reconstruction/experiments/all_results.json` (Experiment 1)
+- `logit_reconstruction/experiments/carlini_results.json` (Experiment 3)
+- `logit_reconstruction/experiments/*_metrics.txt` (per-model/per-N summaries)

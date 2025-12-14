@@ -1,45 +1,43 @@
-# 🚀 Real-World Attack: Live Extraction of BERT
+# DisGUIDE (Disagreement-Guided Active Querying)
 
-In addition to our offline baselines, we performed a realistic **"Live Extraction"** attack against a fine-tuned Transformer model. This experiment simulates a real-world scenario where the attacker queries a black-box API (e.g., an LLM or commercial classifier) to train a lightweight surrogate.
+This directory contains a DisGUIDE-style (query-by-committee) **live extraction** experiment. The attacker queries a black-box teacher on a limited budget and trains a lightweight surrogate by prioritizing samples where two student models disagree.
 
-## ⚔️ Attack Setup
+## Attack Setup
 
-* **Victim (Teacher):** `textattack/bert-base-uncased-yelp-polarity` (Fine-tuned BERT)
-    * *Access:* Black-box API (Input text $\to$ Probability distribution)
-* **Thief (Student Committee):**
-    * **Student 1:** TF-IDF + Ridge Regression (Stable solver)
-    * **Student 2:** TF-IDF + SGD Regression (Adversarial solver)
-* **Strategy:** **DisGUIDE (Query-By-Committee)**
-    * We maintain a pool of unlabeled Yelp reviews.
-    * In each round, we identify samples where the two students **disagree the most** (proxy for uncertainty).
-    * We query the Victim API *only* for these high-value samples.
+- Victim (teacher): `textattack/bert-base-uncased-yelp-polarity`
+  - Access: black-box probabilities (input text -> probability distribution)
+- Thief (student committee):
+  - Student 1: TF-IDF + Ridge regression
+  - Student 2: TF-IDF + SGD regression
+- Strategy: iteratively query the teacher on inputs with highest student disagreement.
 
-## 📊 Results: 1,000 Query Budget
+## Results (1,000 query budget)
 
-We restricted the attack to a budget of **1,000 queries** (approx. 0.18% of the full Yelp dataset).
+| Stage   | Queries | Student Accuracy | Avg Disagreement |
+| ------- | ------: | ---------------: | ---------------: |
+| Initial |     100 |           74.10% |           0.2264 |
+| Round 3 |     400 |           77.40% |           0.1449 |
+| Round 6 |     700 |           80.50% |           0.0885 |
+| Final   |   1,000 |           82.50% |           0.0676 |
 
-| Round | Queries | Student Accuracy | Avg Disagreement (Uncertainty) |
-| :--- | :--- | :--- | :--- |
-| **Initial** | 100 | 74.10% | 0.2264 |
-| **Round 3** | 400 | 77.40% | 0.1449 |
-| **Round 6** | 700 | 80.50% | 0.0885 |
-| **Final** | **1,000** | **82.50%** | **0.0676** |
+## How to Run
 
-### 💡 Key Findings
-1.  **High Fidelity:** With only **1,000 samples**, our linear student achieved **82.5% accuracy** against the BERT teacher. This represents a **+8.4% improvement** over the initial random seed.
-2.  **Uncertainty Reduction:** The average disagreement between students dropped exponentially from **0.23** to **0.07**. This confirms that the Active Learning strategy successfully identified and resolved the "blind spots" in the student's knowledge.
-3.  **Efficiency:** The method converged rapidly; by 700 queries, the students had largely aligned, and marginal gains decreased, suggesting extremely high data efficiency.
+Implementation:
 
-## 🏃‍♀️ How to Run (Colab / GPU)
+- `disguide/disguide.py`
 
-This experiment requires a GPU to run the Teacher (BERT) inference efficiently.
+The script is currently a Colab export and uses top-level configuration variables near the top of the file (teacher model, budget, step size, etc.). Adjust those if needed, then run from the repo root:
 
 ```bash
-# Install dependencies
-pip install transformers datasets scikit-learn numpy torch
+uv run python disguide/disguide.py
+```
 
-# Run the live extraction script
-python steal_disguide_live_teacher.py \
-  --teacher_model "textattack/bert-base-uncased-yelp-polarity" \
-  --dataset_hub "yelp_polarity" \
-  --query_budget 1000
+Outputs:
+
+- Prints per-round metrics to stdout.
+- Saves `student_live_disguide.joblib` in the current working directory.
+
+Notes:
+
+- A GPU is recommended for fast teacher inference
+- CPU works but is slower.
